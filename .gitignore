@@ -1,0 +1,13 @@
+# Private Nintendo dumps, generated archives, and research downloads
+/Games/
+/Updates/
+/DLCs/
+/.private/
+/build/
+/dist/
+/local/
+__pycache__/
+*.pyc
+.env
+.env.*
+*.log

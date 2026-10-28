@@ -1,0 +1,13 @@
+# Sources and implementation notes
+
+Consulted 2026-10-27. Forum material is historical evidence, not a guarantee for every update.
+
+- [Requested GBAtemp help thread](https://gbatemp.net/threads/discussion-smash-wiiu-modding-and-help-center.419366/): general Smash Wii U workflow.
+- [KillzXGaming CSS tutorial and contemporary researcher replies](https://gbatemp.net/threads/tutorial-sm4sh-changing-css-custom-sounds-per-costume-and-more-mega-thread.426351/): donor-row cloning, fighter IDs, CSS field 13, victory/results limitations, non-DLC vs DLC placement. Its early field-10 description conflicts with later research; the builder treats field 9 as visibility and field 10 as DLC. Its enemy Gunner ID typo is corrected using the dump and editor source.
+- [Cuyler36 CSS Database Editor](https://github.com/Cuyler36/Smash-4-CSS-Database-Editor), commit `1d0ff81`: `Classes/Character.cs` and `DataManager.cs` establish typed fields, fighter IDs 0–64, reserved cosmetics and cosmetic mappings. Source was inspected, not bundled.
+- [Sammi-Husky Sm4sh-Tools](https://github.com/Sammi-Husky/Sm4sh-Tools), commit `0173bd3`: DTLS resource/LS structs and PARAM typed-value format. Independent Python readers implement those formats.
+- [Deinonychus71 Sm4shExplorer](https://github.com/Deinonychus71/Sm4shExplorer), commit `db54ddc`: archive/resource rebuilding, string-table layout, 0x80 alignment, 0x80-byte patchlist records and path ordering. No third-party code or executable is redistributed.
+- [Aroma SDCafiine upstream](https://github.com/wiiu-env/sdcafiine_plugin): `wiiu/sdcafiine/TITLEID/MODPACK/content` layout.
+- [Legacy SDCafiine upstream](https://github.com/Maschell/SDCafiine): `sdcafiine/TITLEID/MODPACK/content` layout.
+
+Local evidence: game title `0005000010144F00`; update title `0005000E10144F00`, title version `0x0130` (304). The matching database has 82 structures, each with 53 typed fields / 127 bytes. Rows 60/61 have cosmetics 201/202 with invalid fighter IDs; rows 73/74/75 have fighter IDs 62/63/64. Every requested hidden fighter has a `fighter/<name>/model/body/c00/model.nud` resource. Boss/item rows 64–72 have invalid fighter IDs. The executable contains the expected seven fighter names and corresponding UI-name variants. Game content and executable-derived data remain private; no binary bytes are reproduced here.
