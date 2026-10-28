@@ -1,5 +1,7 @@
 # Smash Wii U Hidden Fighter CSS Expansion
 
+> **Known boot failure (2026-10-28):** The seven-v2 build was reported to black-screen under Aroma SDCafiine. Neither original profile is a recommended working release. Structural checks did not establish game compatibility. Diagnostic testing is in progress.
+
 Experimental **US SDCafiine** mod builder. Builds from your own game and update dump; no Nintendo assets are distributed here.
 
 **Status:** archive and database checks pass. Console gameplay has not been tested. This is not a verified stable release. Final Smash forms have documented victory/results crashes; setting the UI victory flag to zero is only a fallback and does not fix their fighter code.
