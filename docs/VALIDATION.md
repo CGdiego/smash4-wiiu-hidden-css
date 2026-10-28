@@ -1,6 +1,14 @@
 # Runtime validation still required
 
-Structural verification has passed; no Wii U or emulator gameplay was performed. Neither profile is promoted as stable.
+The original four/seven profiles have not passed runtime validation; seven-v2 produced an Aroma boot failure. Later probes were tested by the user on a US Wii U with Aroma SDCafiine:
+
+- 00 StockControl: boot and CSS passed.
+- 01 MarioSevenCostumes: boot and CSS passed.
+- 02 GigaBowser in BowserSlot: Training loading/control passed; death restores Bowser.
+- 03 SeparateSlot: extra slot selects playable Giga Bowser. Icon is white and name missing. Death restores Bowser; a subsequent win produced a T-pose and results softlock.
+- 04 UI probe: built, not yet console-tested. Adds normal Bowser art/nameplate placeholders as external overrides, preserves all native RF records (including records omitted by the original reader), and retains test03 packed files byte for byte. Does not fix respawn/results.
+
+The assistant has not run gameplay locally. Neither original profile nor any probe is a stable release.
 
 Start with a clean US game and only this pack. Record game update, SDCafiine version, active language and profile. Test each hidden fighter separately before testing combinations.
 
