@@ -6,7 +6,8 @@ The original four/seven profiles have not passed runtime validation; seven-v2 pr
 - 01 MarioSevenCostumes: boot and CSS passed.
 - 02 GigaBowser in BowserSlot: Training loading/control passed; death restores Bowser.
 - 03 SeparateSlot: extra slot selects playable Giga Bowser. Icon is white and name missing. Death restores Bowser; a subsequent win produced a T-pose and results softlock.
-- 04 UI probe: built, not yet console-tested. Adds normal Bowser art/nameplate placeholders as external overrides, preserves all native RF records (including records omitted by the original reader), and retains test03 packed files byte for byte. Does not fix respawn/results.
+- 04 UI probe: user confirmed boot, followed by a freeze with buzzing audio while loading CSS. Do not use. It added 88 external UI overrides across four partitions. Root cause is not established.
+- 05 SinglePortrait: built, awaiting console testing. Temporarily reassigns normal Bowser's existing CSS portrait record to Giga Bowser. No new records, external flags, name blocks, nameplates or aliases. Normal Bowser may have a blank icon during this diagnostic. All packed files and patchlist remain identical to test03. Respawn/results are unchanged.
 
 The assistant has not run gameplay locally. Neither original profile nor any probe is a stable release.
 

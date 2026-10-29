@@ -11,6 +11,7 @@ PUBLIC_FILES=[
     'tools/smash4.py','tools/build.py','tools/package_source.py',
     'tools/verify_build.py','tests/test_builder.py',
     'tools/build_boot_probes.py','tools/build_giga_probe.py','tools/build_ui_probe.py',
+    'tools/build_single_portrait_probe.py','docs/UI-FAILURE-AUDIT.md',
 ]
 
 
