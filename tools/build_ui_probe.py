@@ -11,6 +11,13 @@ from smash4 import Dump, Resource, sortkey, u32
 
 def add_ui_records(resource, items):
     """Insert records without discarding native hidden/empty-directory records."""
+    # Windows and FAT SD paths cannot safely hold names differing only by case.
+    # Test04 violated this invariant; reject its inputs before any RF mutation.
+    folded={entry.path.casefold() for entry in resource.entries}
+    for path,donor,blob,raw in items:
+        if path.casefold() in folded:
+            raise ValueError('Case-insensitive resource path collision: '+path)
+        folded.add(path.casefold())
     native=resource.data
     start=u32(native,12)
     start+=u32(native,start)*8+4
