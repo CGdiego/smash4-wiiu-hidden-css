@@ -1,71 +1,51 @@
-# Smash Wii U Hidden Fighter CSS Expansion
+# Smash Wii U hidden CSS expansion — US v304
 
-> **Known boot failure (2026-10-28):** The seven-v2 build was reported to black-screen under Aroma SDCafiine. Neither original profile is a recommended working release. Structural checks did not establish game compatibility. Diagnostic testing is in progress.
+Work in progress. **A complete stable mod has not been achieved.** Original seven-v2 fails to boot on Aroma; probe04 and candidate06 fail while entering CSS. Do not install those builds.
 
-Experimental **US SDCafiine** mod builder. Builds from your own game and update dump; no Nintendo assets are distributed here.
+Candidate07 uses official Sm4shExplorer 0.07.4 packing, seven existing rows and executable-verified cosmetic names. It corrects candidate06's partial language packs: shared portraits are imported once into data, while genuinely localized UI stays in its native partition. The user confirmed CSS loading and Giga Bowser Training in Cemu. An experimental, separately built Giga-only Aroma companion now addresses the observed KO conversion in the equivalent Cemu engine probe; it is not hardware validated. Results, UI rendering, other fighters and console behavior still require investigation.
 
-**Status:** archive and database checks pass. Console gameplay has not been tested. This is not a verified stable release. Final Smash forms have documented victory/results crashes; setting the UI victory flag to zero is only a fallback and does not fix their fighter code.
+## Candidate roster
 
-## Fighters
-
-| Fighter | Character ID (decimal) | Cosmetic ID (decimal) | DB row (zero based) | CSS position (field 13) |
+| Fighter | Fighter ID | Cosmetic ID | DB row | CSS position |
 |---|---:|---:|---:|---:|
 | Giga Bowser | 58 | 201 | 60 | 52 |
-| Wario-Man | 59 | 60 | 82 (added) | 53 |
+| Wario-Man | 59 | 203* | 62 | 53 |
 | Giga Mac | 60 | 202 | 61 | 54 |
-| Mega Lucario | 61 | 62 | 83 (added) | 55 |
+| Mega Lucario | 61 | 204* | 63 | 55 |
 | Fighting Mii Brawler | 62 | 219 | 73 | 56 |
 | Fighting Mii Swordfighter | 63 | 220 | 74 | 57 |
 | Fighting Mii Gunner | 64 | 221 | 75 | 58 |
 
-`forms` enables four forms. `seven` additionally enables the three enemy Miis. Each gets one costume (`c00`). CSS position is a group-relative value, not the database row or fighter ID. New slots use the non-DLC group; installed DLC remains unchanged. The ordinary Mii menu and Random entries remain intact.
+All numbers are decimal and rows are zero based. CSS position is field13, distinct from fighter ID and database row. *203/204 repurpose Question/sh_all placeholder cosmetics; these are valid native names, not dedicated Wario-Man/Mega Lucario cosmetic mappings. Other menus using generic artwork may be affected. IDs60/62 previously used as cosmetics are absent from this executable's mapping table and were incorrect.
 
-Master Hand, Crazy Hand, Master Core, Ridley, Metal Face, Yellow Devil, Sandbag, Bomb and the other illustrated icons are excluded: the inspected UI rows contain invalid fighter ID `0xFFFFFFFF`. Icons do not supply fighter modules or player controls. Making these into fighters requires a separate engine/moveset project. This mod does not manufacture missing characters or unlock unowned DLC.
+The 82-row database, normal fighter rows, Random and normal Mii menu remain intact. Each added fighter uses c00. Portraits and nameplates are ordinary-fighter placeholders, not completed custom artwork. Boss/item icons whose fighter ID is 0xFFFFFFFF do not provide controllable fighter modules and are excluded.
 
-## Build
+## Rebuild locally
 
-Requires Python 3.10+ and a decrypted, matching US game/update dump with `content/ls`, `dt00`, `dt01`, and `content/patch/`.
+Requires a matching decrypted US v304 base/update dump and the official [Sm4shExplorer 0.07.4 release](https://github.com/thefungus/Sm4shExplorer/releases/tag/0.07.4). Keep all game data and generated archives private.
 
-```sh
-python tools/build.py --game "Games/Super Smash Bros/content" --update "Updates/Super Smash Bros/content" --profile forms --out build/forms
-python tools/build.py --game "Games/Super Smash Bros/content" --update "Updates/Super Smash Bros/content" --profile seven --out build/seven
-python -m unittest discover -s tests -v
-```
+1. Place the owned base/update content under `Games/Super Smash Bros` and `Updates/Super Smash Bros`.
+2. Run `python tools/prepare_native_candidate.py` once against fresh output paths. It validates the native cosmetic table and generates a private exporter manifest and 126 inputs. Optional `--out`, `--manifest` and `--report` select fresh paths for another build.
+3. Provide Sm4shExplorer a merged game view: base content dt00/dt01/ls, the update patch directory and update metadata. The wrapper opens this view read only.
+4. Run `tools/export_with_sm4shexplorer.ps1` using **32-bit Windows PowerShell**, passing `-ExporterExe`, `-GameRoot`, a fresh `-WorkRoot`, and `-Manifest .private/official-inputs.json`.
+5. Run `python tools/verify_official_candidate.py --patch <official-export>/content/patch`.
+6. Run `python tools/package_official_candidate.py --patch <official-export>/content/patch`.
+7. Run `python -m unittest discover -s tests -v` and `python tools/package_source.py`.
 
-The current baseline is the 82-row US database, paired with the update's own resource tables. Title IDs, donor IDs, reserved rows and database dimensions are checked before edits. This rejects several incompatible/previously edited inputs; it is not a universal version compatibility guarantee. Outputs must be fresh directories. Original dumps are read only.
+The legacy custom-export CLI is disabled. Old probe scripts remain for historical reproduction; they are not a release workflow. The old verifier describes that retired format and must not be used to certify candidate06.
 
-## Install
-
-Use just one generated pack at a time.
-
-Legacy SDCafiine:
+## Aroma SDCafiine layout
 
 ```text
-SD:/sdcafiine/0005000010144F00/HiddenForms-Experimental/content/patch/
-SD:/sdcafiine/0005000010144F00/HiddenSeven-Experimental/content/patch/
+SD:/wiiu/sdcafiine/0005000010144F00/07-HiddenSeven-SharedUI/content/patch/
 ```
 
-Aroma SDCafiine plugin:
+The private candidate ZIP contains this directory tree. Use one pack at a time; do not merge its resource tables with older probes or other CSS mods. This candidate is for offline investigation, not a stable release. The user confirmed Giga Bowser gameplay in probes02/03, but death reverts to Bowser and results can softlock. Candidate07 does not claim to repair these fighter lifecycle issues.
 
-```text
-SD:/wiiu/sdcafiine/0005000010144F00/HiddenForms-Experimental/content/patch/
-SD:/wiiu/sdcafiine/0005000010144F00/HiddenSeven-Experimental/content/patch/
-```
+## Findings and validation
 
-Copy the generated `sdcafiine` folder to the SD root for legacy loading, or place its title-ID folder under `wiiu/sdcafiine` for Aroma. Enable SDCafiine and select the pack when launching the US game. Do not merge packs or combine with another CSS/resource-table mod. Disable this pack and restart to restore stock behavior. No console files are overwritten.
+See [native findings](docs/NATIVE-FINDINGS.md), [failed UI audit](docs/UI-FAILURE-AUDIT.md), [test record](docs/VALIDATION.md) and [sources](docs/SOURCES.md). Offline checks compare imported bytes and affected archive members; they do not establish console stability.
 
-The output contains rebuilt compressed `resource*` tables, a merged `patchlist`, and complete replacements for each affected `packed` archive. Loose `ui_character_db.bin` files alone are not an SDCafiine build. All four resource partitions (`data`, `data(us_en)`, `data(us_fr)`, `data(us_sp)`) are handled. Existing archive members stay at their original offsets; new/replaced data is appended. SHA-256 hashes and exact slot edits are in `BUILD-REPORT.json`.
+The [experimental Giga Bowser respawn companion](docs/RESPAWN-COMPANION.md) is a separately built WUPS plugin with narrow US-v304 code signatures. It is not bundled with the SDCafiine candidate and has no console validation.
 
-## Limits and assumptions
-
-- Test offline local versus/training first. Results, respawn, CPU AI, entry, items and transformations can fail; see [validation checklist](docs/VALIDATION.md). Eight-player and other modes are unverified.
-- UI reuses matching ordinary-fighter portraits/nameplates, including normal Mii portraits where enemy assets are absent. These are fallback pictures, not the custom art in the reference screenshot. No custom text or runtime patch is claimed.
-- Cosmetic IDs 201/202 and 219–221 come from the supplied database. Wario-Man 60 and Mega Lucario 62 use the CSS editor's documented cosmetic mapping. Filename variants follow inspected executable strings; aliases cover the observed capitalization differences. Rendering still needs hardware confirmation.
-- Existing hidden rows 60/61 and 73–75 are reused. Wario-Man and Mega Lucario lack database rows, so two rows are appended; no boss/item placeholders are overwritten.
-- Victory field 5 is set to zero for fallback UI. Missing results motions, specializer logic and Final Smash state requirements are not repaired. A winning team workaround reported in old tutorials is not a stability guarantee.
-
-## Public repository contents
-
-Publish source, tests, documentation and the source-only ZIP. Keep dumps, decrypted executable sections, research downloads and generated SDCafiine archives private. `.gitignore` excludes them; `tools/package_source.py` additionally uses an explicit file allowlist and scans its output for local paths and credential-like material. Publishing under a GitHub account necessarily exposes that account's public identity; source files contain no private email, local user path or dump contents.
-
-See [sources](docs/SOURCES.md). No third-party binaries, firmware, keys, executables or copyrighted game files are included in the public package.
+Public distribution is restricted to source, synthetic tests and documentation. The explicit allowlist and privacy scanner in `tools/package_source.py` exclude dumps, game scripts, decrypted executables, tool downloads, local paths and generated Nintendo assets. No game-data ZIP belongs in this repository.

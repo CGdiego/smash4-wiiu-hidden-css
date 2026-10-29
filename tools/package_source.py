@@ -13,6 +13,12 @@ PUBLIC_FILES=[
     'tools/build_boot_probes.py','tools/build_giga_probe.py','tools/build_ui_probe.py',
     'tools/build_single_portrait_probe.py','docs/UI-FAILURE-AUDIT.md',
     'tests/test_ui_path_collisions.py',
+    'tools/prepare_native_candidate.py','tools/export_with_sm4shexplorer.ps1','docs/NATIVE-FINDINGS.md',
+    'tools/verify_official_candidate.py','tools/package_official_candidate.py',
+    'tests/test_official_validation.py',
+    'companion/main.c','docs/RESPAWN-COMPANION.md',
+    'tools/build_companion.ps1','tools/verify_companion.py',
+    'tests/test_companion_validation.py',
 ]
 
 

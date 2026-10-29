@@ -19,7 +19,7 @@ def fixture():
         if 1<=i<=58:
             v[2]=1
             v[13]=i
-        for row,cosmetic,fid in [(60,201,0xffffffff),(61,202,0xffffffff),(73,219,62),(74,220,63),(75,221,64)]:
+        for row,cosmetic,fid in [(60,201,0xffffffff),(61,202,0xffffffff),(62,203,0xffffffff),(63,204,0xffffffff),(73,219,62),(74,220,63),(75,221,64)]:
             if i==row:
                 v[0],v[6]=cosmetic,fid
         donors={16:15,23:22,39:41,31:30,1:0,2:1,3:2}
@@ -59,14 +59,14 @@ class BuilderTests(unittest.TestCase):
         raw=fixture()
         modified,report=edit_database(raw,FIGHTERS[:4])
         p=Params(modified)
-        self.assertEqual(len(p.groups[0]),84)
+        self.assertEqual(len(p.groups[0]),82)
         self.assertEqual([r['id'] for r in report],[58,59,60,61])
         for f in FIGHTERS[:4]:
             v=p.values(p.groups[0][f['row']])
             self.assertEqual((v[0],v[6],v[7],v[9],v[10]),(f['cosmetic'],f['id'],1,0,0))
         original=Params(raw)
         for i in range(82):
-            if i not in {60,61}:
+            if i not in {60,61,62,63}:
                 self.assertEqual(original.values(original.groups[0][i]),p.values(p.groups[0][i]))
 
     def test_seven_have_unique_ids_and_positions(self):
@@ -87,6 +87,27 @@ class BuilderTests(unittest.TestCase):
         p=Params(fixture())
         p.set(p.groups[0][16][6],999)
         with self.assertRaises(ValueError):
+            edit_database(bytes(p.data),FIGHTERS)
+
+    def test_duplicate_slot_rejected(self):
+        with self.assertRaisesRegex(ValueError,'Duplicate'):
+            edit_database(fixture(),[FIGHTERS[0],FIGHTERS[0]])
+
+    def test_normal_row_replacement_and_appending_rejected(self):
+        for row in (16,82):
+            f=dict(FIGHTERS[0],row=row)
+            with self.assertRaisesRegex(ValueError,'Unsupported fighter mapping'):
+                edit_database(fixture(),[f])
+
+    def test_invalid_cosmetic_rejected(self):
+        f=dict(FIGHTERS[1],cosmetic=60)
+        with self.assertRaisesRegex(ValueError,'Unsupported fighter mapping'):
+            edit_database(fixture(),[f])
+
+    def test_mismatched_row_schema_rejected(self):
+        p=Params(fixture())
+        p.data[p.groups[0][60][-1][0]]=2
+        with self.assertRaisesRegex(ValueError,'typed schema'):
             edit_database(bytes(p.data),FIGHTERS)
 
     def test_rf_addition_keeps_original_names(self):

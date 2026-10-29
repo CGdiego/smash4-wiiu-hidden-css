@@ -28,6 +28,17 @@ class Entry:
         return bool(self.flags & 0x200)
 
 
+def owns_pack(partition, parent):
+    """Physical ownership comes from the packed folder, not child flags.
+
+    Native language RF tables can set 0x800 on inherited children even when
+    the enclosing folder is shared. Do not synthesize partial language packs.
+    """
+    if not parent.directory or not parent.flags&0x400:
+        raise ValueError('A packed folder record is required')
+    return partition=='data' or bool(parent.flags&0x800)
+
+
 class Resource:
     def __init__(self, data):
         if data[:2] != b'RF':

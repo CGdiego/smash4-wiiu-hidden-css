@@ -56,4 +56,4 @@ def main():
 
 
 if __name__=='__main__':
-    main()
+    raise SystemExit('Retired custom-export verifier. Use verify_official_candidate.py; it checks the 82-row official-export candidate.')

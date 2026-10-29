@@ -13,13 +13,13 @@ from smash4 import Dump, Entry, Params, Resource, rebuild_resource
 TITLE = '0005000010144F00'
 DB = 'param/ui/ui_character_db.bin'
 FIGHTERS = [
-    dict(name='Giga Bowser', id=58, cosmetic=201, row=60, donor=16, asset='Koopag', aliases=['KoopaG'], base='Koopa', module='koopag'),
-    dict(name='Wario-Man', id=59, cosmetic=60, row=82, donor=23, asset='Warioman', aliases=[], base='Wario', module='warioman'),
-    dict(name='Giga Mac', id=60, cosmetic=202, row=61, donor=39, asset='Littlemacg', aliases=['LittlemacG'], base='Littlemac', module='littlemacg'),
-    dict(name='Mega Lucario', id=61, cosmetic=62, row=83, donor=31, asset='LucarioM', aliases=[], base='Lucario', module='lucariom'),
-    dict(name='Fighting Mii Brawler', id=62, cosmetic=219, row=73, donor=1, asset='Miienemyf', aliases=['MiiEnemyF'], base='Miifighter', module='miienemyf'),
-    dict(name='Fighting Mii Swordfighter', id=63, cosmetic=220, row=74, donor=2, asset='Miienemys', aliases=['MiiEnemyS'], base='Miiswordsman', module='miienemys'),
-    dict(name='Fighting Mii Gunner', id=64, cosmetic=221, row=75, donor=3, asset='Miienemyg', aliases=['MiiEnemyG'], base='Miigunner', module='miienemyg'),
+    dict(name='Giga Bowser', id=58, cosmetic=201, row=60, donor=16, asset='Koopag', aliases=[], base='Koopa', module='koopag'),
+    dict(name='Wario-Man', id=59, cosmetic=203, row=62, donor=23, asset='Question', aliases=[], base='Wario', module='warioman'),
+    dict(name='Giga Mac', id=60, cosmetic=202, row=61, donor=39, asset='Littlemacg', aliases=[], base='Littlemac', module='littlemacg'),
+    dict(name='Mega Lucario', id=61, cosmetic=204, row=63, donor=31, asset='sh_all', aliases=[], base='Lucario', module='lucariom'),
+    dict(name='Fighting Mii Brawler', id=62, cosmetic=219, row=73, donor=1, asset='Miienemyf', aliases=[], base='Miifighter', module='miienemyf'),
+    dict(name='Fighting Mii Swordfighter', id=63, cosmetic=220, row=74, donor=2, asset='Miienemys', aliases=[], base='Miiswordsman', module='miienemys'),
+    dict(name='Fighting Mii Gunner', id=64, cosmetic=221, row=75, donor=3, asset='Miienemyg', aliases=[], base='Miigunner', module='miienemyg'),
 ]
 
 
@@ -32,9 +32,19 @@ def edit_database(raw, fighters):
     if len(params.groups)!=1 or len(params.groups[0])!=82 or len(params.groups[0][0])!=53:
         raise ValueError('Expected unmodified US database: 82 rows of 53 fields')
     rows = params.groups[0]
-    # Use reserved Final Smash and enemy rows; append only the two missing forms.
-    # Never overwrite Random, All Miis, boss, item, DLC or normal fighter rows.
-    expected = {60:(201,0xffffffff),61:(202,0xffffffff),73:(219,62),74:(220,63),75:(221,64)}
+    if any(len(r)!=53 or any(field[1]!=reference[1] for field,reference in zip(r,rows[0])) for r in rows):
+        raise ValueError('Database rows must share the expected typed schema')
+    original_values=[params.values(r) for r in rows]
+    allowed={(f['row'],f['id'],f['cosmetic'],f['donor'],f['module']) for f in FIGHTERS}
+    for f in fighters:
+        if (f['row'],f['id'],f['cosmetic'],f['donor'],f['module']) not in allowed:
+            raise ValueError('Unsupported fighter mapping; no arbitrary row replacement or append is permitted')
+    for field in ('row','id','cosmetic'):
+        if len({f[field] for f in fighters})!=len(fighters):
+            raise ValueError('Duplicate fighter '+field)
+    # Reuse Final Smash, generic placeholder and enemy rows, preserving 82 rows.
+    # Question/sh_all reuse can affect generic artwork in other menus.
+    expected = {60:(201,0xffffffff),61:(202,0xffffffff),62:(203,0xffffffff),63:(204,0xffffffff),73:(219,62),74:(220,63),75:(221,64)}
     for index,(cosmetic,fighter) in expected.items():
         v=params.values(rows[index])
         if (v[0],v[6],v[2]) != (cosmetic,fighter,0):
@@ -44,7 +54,6 @@ def edit_database(raw, fighters):
             raise ValueError('Donor fighter does not match expected database')
     # Include the hidden normal Miis in allocation so their positions stay unique.
     nextpos=max(params.values(r)[13] for r in rows if params.values(r)[2] and not params.values(r)[10])+1
-    newrows=[]
     for order,f in enumerate(fighters):
         donor=rows[f['donor']]
         begin=donor[0][0]
@@ -58,21 +67,16 @@ def edit_database(raw, fighters):
             pos,kind,_=donor[index]
             from smash4 import FORMATS
             struct.pack_into('>'+FORMATS[kind],data,pos-begin+1,value)
-        if f['row']<82:
-            target=rows[f['row']]
-            params.data[target[0][0]:target[-1][0]+2]=data
-        else:
-            newrows.append((f['row'],bytes(data)))
-    for expected_index,data in sorted(newrows):
-        if expected_index != 82+(len(params.data)-len(raw))//127:
-            raise ValueError('Unexpected appended row order')
-        params.data+=data
-    struct.pack_into('>I',params.data,9,82+len(newrows))
+        target=rows[f['row']]
+        if len(data)!=target[-1][0]+2-target[0][0]:
+            raise ValueError('Replacement row size differs')
+        params.data[target[0][0]:target[-1][0]+2]=data
+    if len(params.data)!=len(raw):raise ValueError('Database length changed')
     result=bytes(params.data)
     parsed=Params(result)
     changed={f['row'] for f in fighters}
     for i,row in enumerate(rows):
-        if i not in changed and params.values(row)!=parsed.values(parsed.groups[0][i]):
+        if i not in changed and original_values[i]!=parsed.values(parsed.groups[0][i]):
             raise ValueError('An unrelated database row changed')
     report=[]
     for order,f in enumerate(fighters):
@@ -206,6 +210,7 @@ def build(args):
 
 
 if __name__=='__main__':
+    raise SystemExit('Legacy custom exporter disabled after console boot failure. Use prepare_native_candidate.py and export_with_sm4shexplorer.ps1; see README.md.')
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--game',required=True,help='Base game content directory')
     parser.add_argument('--update',required=True,help='Matching update content directory')
