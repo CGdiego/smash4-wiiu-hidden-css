@@ -6,8 +6,9 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 PUBLIC_FILES=[
-    '.gitignore','README.md','LICENSE',
+    '.gitignore','README.md','LICENSE','CONTRIBUTING.md','SECURITY.md',
     'docs/SOURCES.md','docs/VALIDATION.md',
+    'docs/MAINTAINER-GUIDE.md',
     'tools/smash4.py','tools/build.py','tools/package_source.py',
     'tools/verify_build.py','tests/test_builder.py',
     'tools/build_boot_probes.py','tools/build_giga_probe.py','tools/build_ui_probe.py',

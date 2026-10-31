@@ -49,3 +49,10 @@ See [native findings](docs/NATIVE-FINDINGS.md), [failed UI audit](docs/UI-FAILUR
 The [experimental Giga Bowser respawn companion](docs/RESPAWN-COMPANION.md) is a separately built WUPS plugin with narrow US-v304 code signatures. It is not bundled with the SDCafiine candidate and has no console validation.
 
 Public distribution is restricted to source, synthetic tests and documentation. The explicit allowlist and privacy scanner in `tools/package_source.py` exclude dumps, game scripts, decrypted executables, tool downloads, local paths and generated Nintendo assets. No game-data ZIP belongs in this repository.
+
+## Maintainer and contributor handoff
+
+The [maintainer guide](docs/MAINTAINER-GUIDE.md) records the data flow,
+mapping invariants, localization rules, experimental boundaries and handoff
+checklist. See [contributing](CONTRIBUTING.md) for the test/build workflow and
+[security](SECURITY.md) for source-only distribution and privacy requirements.
